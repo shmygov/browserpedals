@@ -1,0 +1,11 @@
+*.py[cod]
+__pycache__
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
