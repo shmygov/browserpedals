@@ -65,6 +65,34 @@ To pause/play the video, press right pedal (or other pedal of your choice).
 
 To jump back in the video, press left pedal (or other pedal of your choice).
 
+### Additional option to create subtitles:
+
+The program can be used to create subtitles: after every Play and Pause using pedals, SRT subtitle data for the played fragment is copied to the clipboard and can be pasted into any text.
+
+So, plain text file like this one:
+```
+What's up guys? This is the first subtitle.
+And this is the second subtitle.
+```
+after pasting subtitle data from the clipboard will become an SRT subtitle file:
+```
+1
+00:00:00,100 --> 00:00:01,900
+What's up guys? This is the first subtitle.
+
+2
+00:00:02,000 --> 00:00:04,266
+And this is the second subtitle.
+
+```
+
+To use subtitles option on Linux, additionally install xclip:
+```
+sudo apt-get install xclip
+```
+
+Also, the program can be used to periodically pause a video and copy timestamps to clipboard.
+
 
 ## Automatic pedals detection:
 
@@ -110,6 +138,14 @@ Available options:
 
 *jump_back_sec*: By default, pressing the "jump back" pedal rewinds the video 5 seconds back. To use another time jump, change the *value* of the *jump_back_sec* option in the options file correspondingly. It may be any number, possibly with a fractional part. 
 
+*subtitles_to_clipboard*: If this feature is enabled, every time user presses the pedal to Play the video and then presses the pedal to Pause it, subtitle timing data in SRT format is created for the video fragment just played (Play starts the subtitle, Pause ends the subtitle), and this SRT data is copied to the clipboard, so the user can paste it into any text file. To enable this feature, set the *value* of the *subtitles_to_clipboard* option in the options file to 1. To disable this feature, set it to 0.  
+*Important:* On Linux, to use this feature instal *xclip*: `sudo apt-get install xclip`
+
+*pause_period_sec*: If this feature is enabled, the video/audio periodically pauses at certain time points in the video. During each such pause, current time point in the video/audio is copied to the clipboard, so the user can paste it into any text file. The string copied to the clipboard will have the format specified in the next option of the options file called *periodic_timestamp_format*. To enable this feature, set the *value* of the *pause_period_sec* option in the options file to desired time interval between pauses, in seconds, possibly with a fractional part. To disable this feature, set the value to 0.  
+*Important:* On Linux, to use this feature instal *xclip*: `sudo apt-get install xclip`
+
+*periodic_timestamp_format*: If the previous feature called *pause_period_sec* is enabled, this option specifies the format of the timestamp string which is copied to the clipboard during each periodic pause. Set the *value* of the *periodic_timestamp_format* option in the options file to a Python format string, for example it can contain format elements such as {SS:04d} - in this string you can use variables SS (time in seconds), MM (time in minutes), hh (hours), mm (minutes), ss (seconds), uu (milliseconds).
+
 
 ## Browser data:
 
@@ -134,7 +170,7 @@ The program comes with a pre-installed Web Driver for Firefox browser, so if you
 
 Install the Web Driver for the browser you want to use. The download links are on the site:
 
-[Download a Web Driver](https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference)
+[Download a Web Driver](https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location/#download-the-driver)
 
 **Important**: For all browsers except Firefox, the version of Web Driver file should match the current version of your browser.
 

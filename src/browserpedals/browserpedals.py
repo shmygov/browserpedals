@@ -1,6 +1,9 @@
 import os
 import sys
 import time
+import json
+import pyperclip    # pip install pyperclip    # Linux: sudo apt-get install xclip
+import math
 
 from selenium.common.exceptions import (StaleElementReferenceException, NoSuchWindowException,
                                         WebDriverException, InvalidSessionIdException, TimeoutException,
@@ -141,6 +144,14 @@ edge_driver_path = install_resource(WEB_DRIVER_DATA_DIR,
 JUMP_BACK_SEC = options_file_dict['options']['jump_back_sec']['value']
 BROWSER = options_file_dict['options']['browser']['value']
 USER_INTERFACE = options_file_dict['options']['user_interface']['value']
+
+SUBTITLES_TO_CLIPBOARD = options_file_dict['options']['subtitles_to_clipboard']['value']
+
+PAUSE_PERIOD_SEC = options_file_dict['options']['pause_period_sec']['value']
+PAUSE_ZONE_SEC = 0.2    # Video/Audio will pause when currentTime gets closer than +/-PAUSE_ZONE_SEC to pause time points.
+PAUSE_PRECISION_SEC = 0.01    # Shift currentTime forward out of the pause zone by PAUSE_PRECISION_SEC so Video can play again.
+
+PERIODIC_TIMESTAMP_FORMAT = options_file_dict['options']['periodic_timestamp_format']['value']
 
 
 driver = None
@@ -311,13 +322,104 @@ def do_in_browser_and_frames(func):
             return
 
 
+subtitle_start_time = 0
+subtitle_index = 0
+
+def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
+    global subtitle_start_time
+    global subtitle_index
+
+    # SRT subtitles file format:
+
+    # 1
+    # 00:00:00,100 --> 00:00:01,900
+    # What's up guys? Just in here with
+    #
+    # 2
+    # 00:00:02,000 --> 00:00:04,266
+    # BCGessentials.com back with
+    #
+
+    # hours:minutes:seconds,milliseconds
+
+    # If user copied previous index to the clipboard, we use it to change the current index.
+    # We asume that this is the case if the clipboard contains a string representing some integer.
+    si = pyperclip.paste()
+    if si.isdigit():
+        subtitle_index = int(si)
+
+    subtitle_index += 1
+
+    floor_1 = math.floor(subtitle_start_time)
+    hours_1 = floor_1 // 3600
+    minutes_1 = (floor_1 - (hours_1 * 3600)) // 60
+    seconds_1 = floor_1 - (hours_1 * 3600) - (minutes_1 * 60)
+    milliseconds_1 = round((subtitle_start_time - floor_1) * 1000)
+
+    hh_1 = f'{hours_1:02d}'
+    mm_1 = f'{minutes_1:02d}'
+    ss_1 = f'{seconds_1:02d}'
+    uuu_1 = f'{milliseconds_1:03d}'
+
+    subtitle_stop_time = float(subtitle_stop_timestamp)
+
+    floor_2 = math.floor(subtitle_stop_time)
+    hours_2 = floor_2 // 3600
+    minutes_2 = (floor_2 - (hours_2 * 3600)) // 60
+    seconds_2 = floor_2 - (hours_2 * 3600) - (minutes_2 * 60)
+    milliseconds_2 = round((subtitle_stop_time - floor_2) * 1000)
+
+    hh_2 = f'{hours_2:02d}'
+    mm_2 = f'{minutes_2:02d}'
+    ss_2 = f'{seconds_2:02d}'
+    uuu_2 = f'{milliseconds_2:03d}'
+
+    si = str(subtitle_index)
+
+    pyperclip.copy(si+'\n'+hh_1+':'+mm_1+':'+ss_1+','+uuu_1+' --> '+hh_2+':'+mm_2+':'+ss_2+','+uuu_2+'\n')
+
+    subtitle_start_time = float(subtitle_stop_timestamp)
+
+def copy_periodic_timepoint_to_clipboard(periodic_timestamp):
+    periodic_time = float(periodic_timestamp)
+
+    periodic_time -= PAUSE_ZONE_SEC + PAUSE_PRECISION_SEC
+
+    SS = math.floor(periodic_time)    # If only seconds are used to express time
+    MM = SS // 60    # If only minutes are used to express time
+    hh = SS // 3600    # Hours
+    mm = (SS - (hh * 3600)) // 60    # Minutes remaining after hours
+    ss = SS - (hh * 3600) - (mm * 60)    # Seconds remaining after remaining minutes
+    uu = round((periodic_time - SS) * 1000)    # milliseconds
+
+    txt = PERIODIC_TIMESTAMP_FORMAT.format(SS=SS, MM=MM, hh=hh, mm=mm, ss=ss, uu=uu)
+
+    pyperclip.copy(txt)
+
 last_manually_played_element_time = 0
 
 def pause_play():
     global last_manually_played_element_time
 
-    manually_played_element_timestamp = driver.execute_script(pause_play_script, last_manually_played_element_time, 
-                                                              exceptions=(NoSuchWindowException,))
+    resStr = driver.execute_script(pause_play_script, last_manually_played_element_time, 
+                                   exceptions=(NoSuchWindowException,))
+
+    resDict = None
+    if resStr and (resStr != ""):
+        try:
+            resDict = json.loads(resStr)
+        except:
+            return False
+    else:
+        return False
+
+    if resDict:
+        manually_played_element_timestamp = resDict.get("timestamp")
+        pause_timestamp = resDict.get("pause_timestamp")
+        play_timestamp = resDict.get("play_timestamp")
+    else:
+        return False
+
     if not manually_played_element_timestamp:
         return False
     manually_played_element_time = int(manually_played_element_timestamp)
@@ -325,13 +427,37 @@ def pause_play():
         last_manually_played_element_time = manually_played_element_time
     elif manually_played_element_time == 0:
         last_manually_played_element_time = 0
+    if SUBTITLES_TO_CLIPBOARD != 0:
+        if pause_timestamp and pause_timestamp != "0":
+            copy_subtitle_to_clipboard(pause_timestamp)
+    if PAUSE_PERIOD_SEC > 0:
+        if play_timestamp and play_timestamp != "0":
+            copy_periodic_timepoint_to_clipboard(play_timestamp)
     return True
 
 def jump_back():
     global last_manually_played_element_time
+    global subtitle_start_time
+    global subtitle_index
 
-    manually_played_element_timestamp = driver.execute_script(jump_back_script, last_manually_played_element_time,
-                                                              JUMP_BACK_SEC, exceptions=(NoSuchWindowException,))
+    resStr = driver.execute_script(jump_back_script, last_manually_played_element_time,
+                                   JUMP_BACK_SEC, exceptions=(NoSuchWindowException,))
+
+    resDict = None
+    if resStr and (resStr != ""):
+        try:
+            resDict = json.loads(resStr)
+        except:
+            return False
+    else:
+        return False
+
+    if resDict:
+        manually_played_element_timestamp = resDict.get("timestamp")
+        jump_timestamp = resDict.get("jump_timestamp")
+    else:
+        return False
+
     if not manually_played_element_timestamp:
         return False
     manually_played_element_time = int(manually_played_element_timestamp)
@@ -339,10 +465,17 @@ def jump_back():
         last_manually_played_element_time = manually_played_element_time
     elif manually_played_element_time == 0:
         last_manually_played_element_time = 0
+    # If we pressed "Pause" pedal after an interval of silence, we should press "Jump Back" pedal.
+    # After that, silence preiod will not increase the subtitle index counter,
+    # and the start time will be set slightly prior to the end time of silence period.
+    if SUBTITLES_TO_CLIPBOARD != 0:
+        if jump_timestamp and jump_timestamp != "0":
+            subtitle_start_time -= 0.5
+            subtitle_index -= 1
     return True
 
 def site_setup():
-    return driver.execute_script(site_setup_script,
+    return driver.execute_script(site_setup_script, PAUSE_PERIOD_SEC, PAUSE_ZONE_SEC, PAUSE_PRECISION_SEC,
                                  exceptions=(NoSuchWindowException, InvalidSessionIdException))
 
 def find_last_played_element():

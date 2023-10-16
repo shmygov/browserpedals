@@ -3,7 +3,8 @@ requires = [
     "setuptools>=42",
     "wheel",
     "pyshortcuts",
-    "platformdirs"
+    "platformdirs",
+    "pyperclip"
 ]
 build-backend = "setuptools.build_meta"
 

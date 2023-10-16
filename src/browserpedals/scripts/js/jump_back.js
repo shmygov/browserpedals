@@ -2,9 +2,12 @@ var latestTime = arguments[0];
 var JUMP_BACK_SEC = arguments[1];
 
 function jumpBack(vid) {
+    var jumpTime = 0;
     if (vid && (vid.currentTime > JUMP_BACK_SEC)) {
+        jumpTime = vid.currentTime;
         vid.currentTime -= JUMP_BACK_SEC;
     }
+    return jumpTime;
 }
 
 var timestamp = "0";
@@ -18,14 +21,22 @@ if (frameLatestTime > latestTime) {
 }
 timestamp = latestTime.toString();
 
+var jumpTimestamp = "0";
+
 if (timestamp != "0") {
     elem = document.querySelector('[data-manually-played-element-timestamp="' + timestamp + '"]')
     if (elem) {
-        jumpBack(elem);
+        var jumpTime = jumpBack(elem);
+        jumpTimestamp = jumpTime.toString();
     } else {
         timestamp = "0";
     }
 }
 
-return timestamp;
+const obj = {};
+obj["timestamp"] = timestamp;
+obj["jump_timestamp"] = jumpTimestamp;
+
+var resStr = JSON.stringify(obj);
+return resStr;
 
