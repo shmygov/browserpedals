@@ -146,9 +146,7 @@ BROWSER = options_file_dict['options']['browser']['value']
 USER_INTERFACE = options_file_dict['options']['user_interface']['value']
 
 SUBTITLES_TO_CLIPBOARD = options_file_dict['options']['subtitles_to_clipboard']['value']
-#new1...
 MIN_GAP_BETWEEN_SUBTITLES_SEC = 0.02
-#...new1
 
 PAUSE_PERIOD_SEC = options_file_dict['options']['pause_period_sec']['value']
 PAUSE_ZONE_SEC = 0.2    # Video/Audio will pause when currentTime gets closer than +/-PAUSE_ZONE_SEC to pause time points.
@@ -345,7 +343,6 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
 
     # hours:minutes:seconds,milliseconds
 
-#new1...
     subtitle_stop_time = float(subtitle_stop_timestamp)
 
     # Following case can happen after Jump Back in the video:
@@ -357,7 +354,6 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
         pyperclip.copy('')
         return
 
-#...new1
     # If user copied previous index to the clipboard, we use it to change the current index.
     # We asume that this is the case if the clipboard contains a string representing some integer.
     si = pyperclip.paste()
@@ -377,10 +373,6 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
     ss_1 = f'{seconds_1:02d}'
     uuu_1 = f'{milliseconds_1:03d}'
 
-#old1...
-#    subtitle_stop_time = float(subtitle_stop_timestamp)
-#
-#...old1
     floor_2 = math.floor(subtitle_stop_time)
     hours_2 = floor_2 // 3600
     minutes_2 = (floor_2 - (hours_2 * 3600)) // 60
@@ -398,21 +390,26 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
 
     subtitle_start_time = float(subtitle_stop_timestamp) + MIN_GAP_BETWEEN_SUBTITLES_SEC
 
-def copy_periodic_timepoint_to_clipboard(periodic_timestamp):
-    periodic_time = float(periodic_timestamp)
-
-    periodic_time -= PAUSE_ZONE_SEC + PAUSE_PRECISION_SEC
-
-    SS = math.floor(periodic_time)    # If only seconds are used to express time
+def copy_time_to_clipboard(current_time):
+    SS = math.floor(current_time)    # If only seconds are used to express time
     MM = SS // 60    # If only minutes are used to express time
     hh = SS // 3600    # Hours
     mm = (SS - (hh * 3600)) // 60    # Minutes remaining after hours
     ss = SS - (hh * 3600) - (mm * 60)    # Seconds remaining after remaining minutes
-    uu = round((periodic_time - SS) * 1000)    # milliseconds
+    uu = round((current_time - SS) * 1000)    # milliseconds
 
     txt = PERIODIC_TIMESTAMP_FORMAT.format(SS=SS, MM=MM, hh=hh, mm=mm, ss=ss, uu=uu)
 
     pyperclip.copy(txt)
+
+def copy_timestamp_to_clipboard(current_timestamp):
+    current_time = float(current_timestamp)
+    copy_time_to_clipboard(current_time)
+
+def copy_periodic_timestamp_to_clipboard(periodic_timestamp):
+    periodic_time = float(periodic_timestamp)
+    periodic_time -= PAUSE_ZONE_SEC + PAUSE_PRECISION_SEC
+    copy_time_to_clipboard(periodic_time)
 
 last_manually_played_element_time = 0
 
@@ -445,12 +442,15 @@ def pause_play():
         last_manually_played_element_time = manually_played_element_time
     elif manually_played_element_time == 0:
         last_manually_played_element_time = 0
-    if SUBTITLES_TO_CLIPBOARD != 0:
+    if SUBTITLES_TO_CLIPBOARD > 0:
         if pause_timestamp and pause_timestamp != "0":
             copy_subtitle_to_clipboard(pause_timestamp)
+    elif SUBTITLES_TO_CLIPBOARD < 0:
+        if pause_timestamp and pause_timestamp != "0":
+            copy_timestamp_to_clipboard(pause_timestamp)
     if PAUSE_PERIOD_SEC > 0:
         if play_timestamp and play_timestamp != "0":
-            copy_periodic_timepoint_to_clipboard(play_timestamp)
+            copy_periodic_timestamp_to_clipboard(play_timestamp)
     return True
 
 def jump_back():
@@ -488,18 +488,12 @@ def jump_back():
     # and the start time will be set slightly prior to the end time of silence period.
     if SUBTITLES_TO_CLIPBOARD != 0:
         if jump_timestamp and jump_timestamp != "0":
-#old1...
-#            subtitle_start_time -= 0.5
-#            subtitle_index -= 1
-#...old1
-#new1...
             subtitle_start_time = float(jump_timestamp) - JUMP_BACK_SEC
             if subtitle_start_time < 0:
                 subtitle_start_time = 0
             subtitle_index -= 2
             if subtitle_index < 0:
                 subtitle_index = 0
-#...new1
     return True
 
 def site_setup():

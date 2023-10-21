@@ -245,7 +245,7 @@ Available options:
 <em>jump_back_sec</em>: By default, pressing the "jump back" pedal rewinds the video 5 seconds back. To use another time jump, change the <em>value</em> of the <em>jump_back_sec</em> option in the options file correspondingly. It may be any number, possibly with a fractional part.
 </p>
 <p>
-<em>subtitles_to_clipboard</em>: If this feature is enabled, every time user presses the pedal to Play the video and then presses the pedal to Pause it, subtitle timing data in SRT format is created for the video fragment just played (Play starts the subtitle, Pause ends the subtitle), and this SRT data is copied to the clipboard. Then it can be pasted to any text file before corresponding text fragment to make it an SRT subtitle. To enable this feature, set the <em>value</em> of the <em>subtitles_to_clipboard</em> option in the options file to 1. To disable this feature, set it to 0.
+<em>subtitles_to_clipboard</em>: If this feature is enabled, every time user presses the pedal to Play the video and then presses the pedal to Pause it, subtitle timing data in SRT format is created for the video fragment just played (Play starts the subtitle, Pause ends the subtitle), and this SRT data is copied to the clipboard. Then it can be pasted to any text file before corresponding text fragment to make it an SRT subtitle. To enable this feature, set the <em>value</em> of the <em>subtitles_to_clipboard</em> option in the options file to 1. To disable this feature, set it to 0. To copy just timestamps to clipboard every time Pause pedal is pressed, instead of copying subtitle data (timestamp format is specified in the option called <em>periodic_timestamp_format</em>), set the value to -1.
 <br>
 <em>Important:</em> On Linux, to use this feature instal <em>xclip</em>: <code>sudo apt-get install xclip</code>
 </p>
@@ -255,7 +255,7 @@ Available options:
 <em>Important:</em> On Linux, to use this feature instal <em>xclip</em>: <code>sudo apt-get install xclip</code>
 </p>
 <p>
-<em>periodic_timestamp_format</em>: If the previous feature called <em>pause_period_sec</em> is enabled, this option specifies the format of the timestamp string which is copied to the clipboard during each periodic pause. Set the <em>value</em> of the <em>periodic_timestamp_format</em> option in the options file to a Python format string, for example it can contain format elements such as {SS:04d} - in this string you can use variables SS (time in seconds), MM (time in minutes), hh (hours), mm (minutes), ss (seconds), uu (milliseconds).
+<em>periodic_timestamp_format</em>: If the feature <em>pause_period_sec</em> is enabled or the value of feature <em>subtitles_to_clipboard</em> is set to -1, this option specifies the format of the timestamp string which is copied to the clipboard during each pause. Set the <em>value</em> of the <em>periodic_timestamp_format</em> option in the options file to a Python format string, for example it can contain format elements such as {SS:04d} - in this string you can use variables SS (time in seconds), MM (time in minutes), hh (hours), mm (minutes), ss (seconds), uu (milliseconds).
 </p>
 <h3>Browser data:</h3>
 <p>
@@ -297,7 +297,7 @@ When this program opens a web browser, it uses a browser user's profile which is
 <em>jump_back_sec</em>: По умолчанию при нажатии педали "возврат назад" видео отматывается назад на 5 секунд. Чтобы использовать другой временной скачок, в файле опций соответствующим образом поменяйте значение <em>value</em> опции <em>jump_back_sec</em>. Это может быть любое число, возможно с дробной частью.
 </p>
 <p>
-<em>subtitles_to_clipboard</em>: Если данная опция включена, каждый раз, когда пользователь нажимает педаль для Воспроизведения видео, а затем нажимает педаль для Паузы видео, для только что проигранного фрагмента видео создаются временные параметры субтитра в SRT-формате (Воспроизведение начинает субтитр, Пауза заканчивает субтитр), и эти SRT-данные копируются в буфер обмена. После этого их можно вставить в любой текстовый файл перед соответствующим фрагментом текста, что превратит фрагмент в SRT-субтитр. Чтобы включить данную функцию, в файле опций поменяйте значение <em>value</em> опции <em>subtitles_to_clipboard</em> на 1. Чтобы отключить данную функцию, поменяйте значение 1 на 0.
+<em>subtitles_to_clipboard</em>: Если данная опция включена, каждый раз, когда пользователь нажимает педаль для Воспроизведения видео, а затем нажимает педаль для Паузы видео, для только что проигранного фрагмента видео создаются временные параметры субтитра в SRT-формате (Воспроизведение начинает субтитр, Пауза заканчивает субтитр), и эти SRT-данные копируются в буфер обмена. После этого их можно вставить в любой текстовый файл перед соответствующим фрагментом текста, что превратит фрагмент в SRT-субтитр. Чтобы включить данную функцию, в файле опций установите значение <em>value</em> опции <em>subtitles_to_clipboard</em> равным 1. Чтобы отключить данную функцию, установите значение 0. Чтобы при каждом нажатии педали Пауза вместо данных субтитра в буфер обмена копировались просто текущие моменты времени видео (в формате, заданном в опции <em>periodic_timestamp_format</em>), установите значение -1.
 <br>
 <em>Важно:</em> В Linux, чтобы использовать данную функцию, установите <em>xclip</em>: <code>sudo apt-get install xclip</code>
 </p>
@@ -307,7 +307,7 @@ When this program opens a web browser, it uses a browser user's profile which is
 <em>Важно:</em> В Linux, чтобы использовать данную функцию, установите <em>xclip</em>: <code>sudo apt-get install xclip</code>
 </p>
 <p>
-<em>periodic_timestamp_format</em>: Если включена предыдущая опция под названием <em>pause_period_sec</em> (периодическая пауза), то данная опция задает формат строки с текущим временем, которая копируется в буфер обмена после каждой периодической паузы. В качестве значения поля <em>value</em> опции <em>periodic_timestamp_format</em> должна выступать строка формата из языка Python. Например, она может содержать элементы формата типа {SS:04d} - в этой строке можно использовать переменные SS (время в секундах), MM (время в минутах), hh (часы), mm (минуты), ss (секунды), uu (миллисекунды).
+<em>periodic_timestamp_format</em>: Если включена опция <em>pause_period_sec</em> или значение опции <em>subtitles_to_clipboard</em> установлено равным -1, то данная опция задает формат строки с текущим временем, которая копируется в буфер обмена после каждой паузы. В качестве значения поля <em>value</em> опции <em>periodic_timestamp_format</em> должна выступать строка формата из языка Python. Например, она может содержать элементы формата типа {SS:04d} - в этой строке можно использовать переменные SS (время в секундах), MM (время в минутах), hh (часы), mm (минуты), ss (секунды), uu (миллисекунды).
 </p>
 <h3>Данные браузера:</h3>
 <p>
@@ -637,6 +637,9 @@ Subtitles are assigned numbers starting from number 1. To continue subtitles fro
 <p>
 Sometimes, there may be a long silent period in the video. When you press Pause pedal after such silent period ends, the clipboard will contain subtitle data for this silent period. But we don't want that. In this case, after you have have pressed Pause pedal at the end of the silent period, press Jump Back pedal. Then press Play pedal, wait for the speech to start, and press Pause pedal. After that, as usual, continue playing, listening to the speech, pausing, and pasting time intervals at the start of subtitles. The pasted subtitle timing will have correct number and will start when the silence ended. The silent subtitle will be dropped.
 </p>
+<p>
+If the value of feature <em>subtitles_to_clipboard</em> is set to -1, just timestamps are copied to clipboard every time Pause pedal is pressed, instead of copying subtitle data. In this case <em>periodic_timestamp_format</em> option specifies the format of the timestamp string which is copied to the clipboard during each pause. Set the <em>value</em> of the <em>periodic_timestamp_format</em> option in the options file to a Python format string, for example it can contain format elements such as {SS:04d} - in this string you can use variables SS (time in seconds), MM (time in minutes), hh (hours), mm (minutes), ss (seconds), uu (milliseconds).
+</p>
 <p style="text-align:center;">
 <button class="linkButton" onclick="document.body.className='browserpedals_options'">Options</button>
 </p>
@@ -693,6 +696,9 @@ Sometimes, there may be a long silent period in the video. When you press Pause 
 <p>
 Иногда по ходу видео может возникнуть продолжительный период молчания. Когда вы нажимаете педаль паузы в конце такого периода молчания, буфер обмена будет содержать данные субтитра, соответствующие этому периоду тишины. Но это совсем не то, что нам нужно. В таком случае, после того, как вы нажали педаль Паузы в конце периода молчания, нажмите педаль Возврата назад. Затем нажмите педаль Воспроизведения, чтобы видео заиграло, дождитесь начала речи и нажмите педаль Паузы. После этого, как обычно, продолжайте запускать видео, останавливать его, и вставлять в текст временные интервалы в начала субтитров. Вставленный временной интервал для субтитра будет иметь правильный номер и будет начинаться после завершения периода молчания. Субтитр с тишиной будет пропущен.
 </p>
+<p>
+Если значение опции <em>subtitles_to_clipboard</em> установлено равным -1, при каждом нажатии педали Пауза вместо данных субтитра в буфер обмена копируются просто текущие моменты времени видео. В этом случае опция <em>periodic_timestamp_format</em> задает формат строки с текущим временем, которая копируется в буфер обмена после каждой паузы. В качестве значения поля <em>value</em> опции <em>periodic_timestamp_format</em> должна выступать строка формата из языка Python. Например, она может содержать элементы формата типа {SS:04d} - в этой строке можно использовать переменные SS (время в секундах), MM (время в минутах), hh (часы), mm (минуты), ss (секунды), uu (миллисекунды).
+</p>
 <p style="text-align:center;">
 <button class="linkButton" onclick="document.body.className='browserpedals_options'">Опции</button>
 </p>
@@ -731,6 +737,9 @@ To enable this feature, set the <em>value</em> of the <em>pause_period_sec</em> 
 <p>
 If the previous feature called <em>pause_period_sec</em> is enabled, the option <em>periodic_timestamp_format</em> specifies the format of the timestamp string which is copied to the clipboard after each periodic pause. Set the <em>value</em> of the <em>periodic_timestamp_format</em> option in the options file to a Python format string, for example it can contain format elements such as {SS:04d} - in this string you can use variables SS (time in seconds), MM (time in minutes), hh (hours), mm (minutes), ss (seconds), uu (milliseconds).
 </p>
+<p>
+If the value of feature <em>subtitles_to_clipboard</em> is set to -1, timestamps are copied to the clipboard also every time Pause pedal is pressed.
+</p>
 <p style="text-align:center;">
 <button class="linkButton" onclick="document.body.className='browserpedals_options'">Options</button>
 </p>
@@ -765,6 +774,9 @@ If the previous feature called <em>pause_period_sec</em> is enabled, the option 
 </p>
 <p>
 Если включена предыдущая опция <em>pause_period_sec</em> (периодическая пауза), то опция <em>periodic_timestamp_format</em> задает формат строки с текущим временем, которая копируется в буфер обмена после каждой периодической паузы. В качестве значения поля <em>value</em> опции <em>periodic_timestamp_format</em> должна выступать строка формата из языка Python. Например, она может содержать элементы формата типа {SS:04d} - в этой строке можно использовать переменные SS (время в секундах), MM (время в минутах), hh (часы), mm (минуты), ss (секунды), uu (миллисекунды).
+</p>
+<p>
+Если значение опции <em>subtitles_to_clipboard</em> установлено равным -1, то текущие моменты времени видео будут копироваться в буфер обмена также при каждом нажатии педали Паузы.
 </p>
 <p style="text-align:center;">
 <button class="linkButton" onclick="document.body.className='browserpedals_options'">Опции</button>

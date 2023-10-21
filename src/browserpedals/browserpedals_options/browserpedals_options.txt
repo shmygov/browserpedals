@@ -13,7 +13,7 @@
     'value': "browser",
     },
   'subtitles_to_clipboard': {
-    'possible_values': 'copy SRT subtitles to clipboard (Play starts subtitle, Pause ends subtitle); 1 to enable, 0 to disable',
+    'possible_values': 'copy SRT subtitles to clipboard (Play starts subtitle, Pause ends it); 1 on, 0 off, -1 just timestamps',
     'value': 0,
     'important': 'On Linux, to use this feature instal xclip: sudo apt-get install xclip',
     },
