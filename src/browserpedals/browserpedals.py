@@ -366,7 +366,7 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
     hours_1 = floor_1 // 3600
     minutes_1 = (floor_1 - (hours_1 * 3600)) // 60
     seconds_1 = floor_1 - (hours_1 * 3600) - (minutes_1 * 60)
-    milliseconds_1 = round((subtitle_start_time - floor_1) * 1000)
+    milliseconds_1 = math.floor((subtitle_start_time - floor_1) * 1000)
 
     hh_1 = f'{hours_1:02d}'
     mm_1 = f'{minutes_1:02d}'
@@ -377,7 +377,7 @@ def copy_subtitle_to_clipboard(subtitle_stop_timestamp):
     hours_2 = floor_2 // 3600
     minutes_2 = (floor_2 - (hours_2 * 3600)) // 60
     seconds_2 = floor_2 - (hours_2 * 3600) - (minutes_2 * 60)
-    milliseconds_2 = round((subtitle_stop_time - floor_2) * 1000)
+    milliseconds_2 = math.floor((subtitle_stop_time - floor_2) * 1000)
 
     hh_2 = f'{hours_2:02d}'
     mm_2 = f'{minutes_2:02d}'
@@ -396,7 +396,7 @@ def copy_time_to_clipboard(current_time):
     hh = SS // 3600    # Hours
     mm = (SS - (hh * 3600)) // 60    # Minutes remaining after hours
     ss = SS - (hh * 3600) - (mm * 60)    # Seconds remaining after remaining minutes
-    uu = round((current_time - SS) * 1000)    # milliseconds
+    uu = math.floor((current_time - SS) * 1000)    # milliseconds
 
     txt = PERIODIC_TIMESTAMP_FORMAT.format(SS=SS, MM=MM, hh=hh, mm=mm, ss=ss, uu=uu)
 
